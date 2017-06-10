@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace Turtle_Graphics_Example
 {
-	public static class Prompt
+	public static class InputPrompt
 	{
 		public static string ShowDialog(string text, string caption)
 		{
@@ -21,7 +21,7 @@ namespace Turtle_Graphics_Example
 
 			Label textLabel = new Label() { Left = 50, Top = 20, Text = text };
 			TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 400 };
-			Button confirmation = new Button() { Text = "Ok", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK };
+			Button confirmation = new Button() { Text = @"&OK", Left = 350, Width = 100, Top = 70, DialogResult = DialogResult.OK };
 			confirmation.Click += (sender, e) => { prompt.Close(); };
 			prompt.Controls.Add(textBox);
 			prompt.Controls.Add(confirmation);

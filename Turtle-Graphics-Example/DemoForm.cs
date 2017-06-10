@@ -94,11 +94,11 @@ namespace Turtle_Graphics_Example
 
 			if (Turtle.ShowTurtle)
 			{
-				buttonShowHideTurtle.Text = "Show Turtle";
+				buttonShowHideTurtle.Text = "Show &Turtle";
 			}
 			else
 			{
-				buttonShowHideTurtle.Text = "Hide Turtle";
+				buttonShowHideTurtle.Text = "Hide &Turtle";
 			}
 		}
 
@@ -112,6 +112,87 @@ namespace Turtle_Graphics_Example
 		{
 			statusBar.Items["Coordinates"].Text = string.Format("X:{0} Y:{1}", Turtle.X, Turtle.Y);
 			statusBar.Items["Angle"].Text = string.Format("Angle:{0}", Turtle.Angle);
+			statusBar.Items["PenStatus"].Text = string.Format("Pen: {0}", Turtle.PenVisible ? "Down" : "Up");
+			statusBar.Items["PenColor"].Text = Turtle.PenColor.ToString();
+			statusBar.Items["PenSize"].Text = string.Format("Size: {0}", Turtle.PenSize);
+		}
+
+		private void buttonSetAngle_Click(object sender, EventArgs e)
+		{
+			string angleText = InputPrompt.ShowDialog("Angle", "Set Turtle Angle");
+
+			float angle;
+			if (float.TryParse(angleText, out angle))
+			{
+				Turtle.Angle = angle;
+				UpdateStatusBar();
+			}
+		}
+
+		private void buttonPenStatus_Click(object sender, EventArgs e)
+		{
+			Turtle.PenVisible = !Turtle.PenVisible;
+
+			if (Turtle.PenVisible)
+			{
+				buttonPenStatus.Text = "Pen &Up";
+			}
+			else
+			{
+				buttonPenStatus.Text = "Pen &Down";
+			}
+
+			UpdateStatusBar();
+
+		}
+
+		private void buttonColor_Click(object sender, EventArgs e)
+		{
+			ColorDialog colorDialog = new ColorDialog();
+			
+			if (colorDialog.ShowDialog(this) == DialogResult.OK)
+			{
+				Turtle.PenColor = colorDialog.Color;
+
+				UpdateStatusBar();
+			}
+		}
+
+		private void buttonPenSize_Click(object sender, EventArgs e)
+		{
+			string penSizeText = InputPrompt.ShowDialog("Size", "Set Pen Size");
+
+			int penSize;
+			if (int.TryParse(penSizeText, out penSize))
+			{
+				Turtle.PenSize = penSize;
+				UpdateStatusBar();
+			}
+
+		}
+
+		private void buttonForward_Click(object sender, EventArgs e)
+		{
+			string distanceText = InputPrompt.ShowDialog("Distance", "Enter Move Distance");
+
+			int distance;
+			if (int.TryParse(distanceText, out distance))
+			{
+				Turtle.Forward(distance);
+				UpdateStatusBar();
+			}
+		}
+
+		private void buttonBackward_Click(object sender, EventArgs e)
+		{
+			string distanceText = InputPrompt.ShowDialog("Distance", "Enter Move Distance");
+
+			int distance;
+			if (int.TryParse(distanceText, out distance))
+			{
+				Turtle.Backward(distance);
+				UpdateStatusBar();
+			}
 		}
 	}
 }
