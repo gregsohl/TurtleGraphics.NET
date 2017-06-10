@@ -13,7 +13,7 @@ namespace Turtle_Graphics_Example
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new TurtleGraphicsDemoForm());
+            Application.Run(new DemoForm());
         }
     }
 }

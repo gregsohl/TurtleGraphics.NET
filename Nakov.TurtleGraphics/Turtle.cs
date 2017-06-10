@@ -1,363 +1,392 @@
-﻿using System;
+﻿#region Namespaces
+
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using Nakov.TurtleGraphics.Properties;
+
+#endregion
 
 namespace Nakov.TurtleGraphics
 {
-    public static class Turtle
-    {
-        private static float x;
-        public static float X
-        {
-            get
-            {
-                InitOnDemand();
-                return x;
-            }
-            set
-            {
-                InitOnDemand();
-                x = value;
-            }
-        }
+	public static class Turtle
+	{
+		#region Public Constants
 
-        private static float y;
-        public static float Y
-        {
-            get
-            {
-                InitOnDemand();
-                return y;
-            }
-            set
-            {
-                InitOnDemand();
-                y = value;
-            }
-        }
+		public const int DEFAULT_PEN_SIZE = 7;
+		public const int DRAW_AREA_SIZE = 10000;
+		public static readonly Color DEFAULT_COLOR = Color.Blue;
 
-        private static float angle;
-        public static float Angle
-        {
-            get
-            {
-                InitOnDemand();
-                return angle;
-            }
-            set
-            {
-                InitOnDemand();
-                angle = value % 360;
-                if (angle < 0)
-                {
-                    angle += 360;
-                }
-            }
-        }
+		#endregion Public Constants
 
-        public static Color PenColor
-        {
-            get
-            {
-                InitOnDemand();
-                return drawPen.Color;
-            }
-            set
-            {
-                InitOnDemand();
-                drawPen.Color = value;
-            }
-        }
+		#region Public Properties
 
-        public static float PenSize
-        {
-            get
-            {
-                InitOnDemand();
-                return drawPen.Width;
-            }
-            set
-            {
-                InitOnDemand();
-                drawPen.Width = value;
-            }
-        }
+		public static float Angle
+		{
+			get
+			{
+				InitOnDemand();
+				return m_Angle;
+			}
+			set
+			{
+				InitOnDemand();
+				m_Angle = value % 360;
+				if (m_Angle < 0)
+				{
+					m_Angle += 360;
+				}
+			}
+		}
 
-        private static bool penVisible;
-        public static bool PenVisible
-        {
-            get
-            {
-                InitOnDemand();
-                return penVisible;
-            }
-            set
-            {
-                InitOnDemand();
-                penVisible = value;
-            }
-        }
+		public static int Delay
+		{
+			get
+			{
+				InitOnDemand();
+				return m_Delay;
+			}
+			set
+			{
+				InitOnDemand();
+				m_Delay = value;
+			}
+		}
 
-        public static bool ShowTurtle
-        {
-            get
-            {
-                InitOnDemand();
-                return turtleHeadImage.Visible;
-            }
-            set
-            {
-                InitOnDemand();
-                turtleHeadImage.Visible = value;
-            }
-        }
+		public static Color PenColor
+		{
+			get
+			{
+				InitOnDemand();
+				return m_DrawPen.Color;
+			}
+			set
+			{
+				InitOnDemand();
+				m_DrawPen.Color = value;
+			}
+		}
 
-        private static int delay;
-        public static int Delay
-        {
-            get
-            {
-                InitOnDemand();
-                return delay;
-            }
-            set
-            {
-                InitOnDemand();
-                delay = value;
-            }
-        }
+		public static float PenSize
+		{
+			get
+			{
+				InitOnDemand();
+				return m_DrawPen.Width;
+			}
+			set
+			{
+				InitOnDemand();
+				m_DrawPen.Width = value;
+			}
+		}
 
-        public const int DrawAreaSize = 10000;
-        public static readonly Color DefaultColor = Color.Blue;
-        public const int DefaultPenSize = 7;        
+		public static bool PenVisible
+		{
+			get
+			{
+				InitOnDemand();
+				return m_PenVisible;
+			}
+			set
+			{
+				InitOnDemand();
+				m_PenVisible = value;
+			}
+		}
 
-        private static Control drawControl;
-        private static Image drawImage;
-        private static Graphics drawGraphics;
-        private static Pen drawPen;
-        private static PictureBox turtleHeadImage;
+		public static bool ShowTurtle
+		{
+			get
+			{
+				InitOnDemand();
+				return m_TurtleHeadImage.Visible;
+			}
+			set
+			{
+				InitOnDemand();
+				m_TurtleHeadImage.Visible = value;
+			}
+		}
 
-        public static void Init(Control targetControl = null)
-        {
-            // Dispose all resources if already allocated
-            Dispose();
+		public static float X
+		{
+			get
+			{
+				InitOnDemand();
+				return m_X;
+			}
+			set
+			{
+				InitOnDemand();
+				m_X = value;
+			}
+		}
+		public static float Y
+		{
+			get
+			{
+				InitOnDemand();
+				return m_Y;
+			}
+			set
+			{
+				InitOnDemand();
+				m_Y = value;
+			}
+		}
+		
+		#endregion Public Properties
 
-            // Initialize the drawing control (sufrace)
-            drawControl = targetControl;
-            if (drawControl == null)
-            {
-                // If no target control is provided, use the currently active form
-                drawControl = Form.ActiveForm;
-            }
-            SetDoubleBuffered(drawControl);
+		#region Public Methods
 
-            // Create an empty graphics area to be used by the turtle
-            drawImage = new Bitmap(DrawAreaSize, DrawAreaSize); 
-            drawControl.Paint += DrawControl_Paint;
-            drawControl.ClientSizeChanged += DrawControl_ClientSizeChanged;
-            drawGraphics = Graphics.FromImage(drawImage);
-            drawGraphics.SmoothingMode = SmoothingMode.AntiAlias;
+		public static void Backward(float distance = 10)
+		{
+			Forward(-distance);
+		}
 
-            // Initialize the pen size and color
-            drawPen = new Pen(DefaultColor, DefaultPenSize);
-            drawPen.StartCap = LineCap.Round;
-            drawPen.EndCap = LineCap.Round;
+		public static void Dispose()
+		{
+			if (m_DrawControl != null)
+			{
+				// Release the pen object
+				m_DrawPen.Dispose();
+				m_DrawPen = null;
 
-            // Initialize the turtle position and other settings
-            X = 0;
-            Y = 0;
-            Angle = 0;
-            PenVisible = true;
-            // Delay = 0;  // Intentionally preserve the "Delay" settings
+				// Release the graphic object
+				m_DrawGraphics.Dispose();
+				m_DrawGraphics = null;
 
-            // Initialize the turtle head image
-            turtleHeadImage = new PictureBox();
-            turtleHeadImage.BackColor = Color.Transparent;
-            drawControl.Controls.Add(turtleHeadImage);
-        }
+				// Release the draw surface (image) object
+				m_DrawImage.Dispose();
+				m_DrawImage = null;
 
-        public static void Dispose()
-        {
-            if (drawControl != null)
-            {
-                // Release the pen object
-                drawPen.Dispose();
-                drawPen = null;
+				// Release the turtle (head) image
+				m_DrawControl.Controls.Remove(m_TurtleHeadImage);
+				m_TurtleHeadImage.Dispose();
+				m_TurtleHeadImage = null;
 
-                // Release the graphic object
-                drawGraphics.Dispose();
-                drawGraphics = null;
+				// Release the drawing control and its associated events
+				m_DrawControl.Paint -= DrawControl_Paint;
+				m_DrawControl.ClientSizeChanged -= DrawControl_ClientSizeChanged;
+				m_DrawControl.Invalidate();
+				m_DrawControl = null;
+			}
+		}
 
-                // Release the draw surface (image) object
-                drawImage.Dispose();
-                drawImage = null;
+		public static void Forward(float distance = 10)
+		{
+			var angleRadians = Angle * Math.PI / 180;
+			var newX = X + (float)(distance * Math.Sin(angleRadians));
+			var newY = Y + (float)(distance * Math.Cos(angleRadians));
+			MoveTo(newX, newY);
+		}
 
-                // Release the turtle (head) image
-                drawControl.Controls.Remove(turtleHeadImage);
-                turtleHeadImage.Dispose();
-                turtleHeadImage = null;
+		public static void Init(Control targetControl = null)
+		{
+			// Dispose all resources if already allocated
+			Dispose();
 
-                // Release the drawing control and its associated events
-                drawControl.Paint -= DrawControl_Paint;
-                drawControl.ClientSizeChanged -= DrawControl_ClientSizeChanged;
-                drawControl.Invalidate();
-                drawControl = null;
-            }
-        }
+			// Initialize the drawing control (sufrace)
+			m_DrawControl = targetControl;
+			
+			if (m_DrawControl == null)
+			{
+				// If no target control is provided, use the currently active form
+				m_DrawControl = Form.ActiveForm;
+			}
+			
+			SetDoubleBuffered(m_DrawControl);
 
-        public static void Reset()
-        {
-            Dispose();
-        }
+			// Create an empty graphics area to be used by the turtle
+			m_DrawImage = new Bitmap(DRAW_AREA_SIZE, DRAW_AREA_SIZE); 
+			m_DrawControl.Paint += DrawControl_Paint;
+			m_DrawControl.ClientSizeChanged += DrawControl_ClientSizeChanged;
+			m_DrawGraphics = Graphics.FromImage(m_DrawImage);
+			m_DrawGraphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-        public static void Forward(float distance = 10)
-        {
-            var angleRadians = Angle * Math.PI / 180;
-            var newX = X + (float)(distance * Math.Sin(angleRadians));
-            var newY = Y + (float)(distance * Math.Cos(angleRadians));
-            MoveTo(newX, newY);
-        }
+			// Initialize the pen size and color
+			m_DrawPen = new Pen(DEFAULT_COLOR, DEFAULT_PEN_SIZE);
+			m_DrawPen.StartCap = LineCap.Round;
+			m_DrawPen.EndCap = LineCap.Round;
 
-        public static void Backward(float distance = 10)
-        {
-            Forward(-distance);
-        }
+			// Initialize the turtle position and other settings
+			X = 0;
+			Y = 0;
+			Angle = 0;
+			PenVisible = true;
+			
+			// Initialize the turtle head image
+			m_TurtleHeadImage = new PictureBox();
+			m_TurtleHeadImage.BackColor = Color.Transparent;
+			m_DrawControl.Controls.Add(m_TurtleHeadImage);
+		}
+		public static void MoveTo(float newX, float newY)
+		{
+			InitOnDemand();
+			var fromX = DRAW_AREA_SIZE / 2 + X;
+			var fromY = DRAW_AREA_SIZE / 2 - Y;
+			X = newX;
+			Y = newY;
 
-        public static void MoveTo(float newX, float newY)
-        {
-            InitOnDemand();
-            var fromX = DrawAreaSize / 2 + X;
-            var fromY = DrawAreaSize / 2 - Y;
-            X = newX;
-            Y = newY;
-            if (PenVisible)
-            {
-                var toX = DrawAreaSize / 2 + X;
-                var toY = DrawAreaSize / 2 - Y;
-                drawGraphics.DrawLine(drawPen, fromX, fromY, toX, toY);
-            }
-            DrawTurtle();
-            PaintAndDelay();
-        }
+			if (PenVisible)
+			{
+				var toX = DRAW_AREA_SIZE / 2 + X;
+				var toY = DRAW_AREA_SIZE / 2 - Y;
+				m_DrawGraphics.DrawLine(m_DrawPen, fromX, fromY, toX, toY);
+			}
 
-        public static void Rotate(float angleDelta)
-        {
-            InitOnDemand();
-            Angle += angleDelta;
-            DrawTurtle();
-            PaintAndDelay();
-        }
-        
-        public static void RotateTo(float newAngle)
-        {
-            InitOnDemand();
-            Angle = newAngle;
-            DrawTurtle();
-            PaintAndDelay();
-        }
+			DrawTurtle();
+			PaintAndDelay();
+		}
 
-        public static void PenUp()
-        {
-            PenVisible = false;
-        }
+		public static void PenDown()
+		{
+			PenVisible = true;
+		}
 
-        public static void PenDown()
-        {
-            PenVisible = true;
-        }
+		public static void PenUp()
+		{
+			PenVisible = false;
+		}
 
-        private static void SetDoubleBuffered(Control control)
-        {
-            // set instance non-public property with name "DoubleBuffered" to true
-            typeof(Control).InvokeMember("DoubleBuffered",
-                BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
-                null, control, new object[] { true });
-        }
+		public static void Reset()
+		{
+			Dispose();
+		}
+		public static void Rotate(float angleDelta)
+		{
+			InitOnDemand();
+			Angle += angleDelta;
+			DrawTurtle();
+			PaintAndDelay();
+		}
+		
+		public static void RotateTo(float newAngle)
+		{
+			InitOnDemand();
+			Angle = newAngle;
+			DrawTurtle();
+			PaintAndDelay();
+		}
 
-        private static void InitOnDemand()
-        {
-            // Create the drawing surface if it does not already exist
-            if (drawControl == null)
-            {
-                Init();
-            }
-        }
+		#endregion Public Methods
 
-        private static void DrawTurtle()
-        {
-            if (ShowTurtle)
-            {
-                var turtleImg = Nakov.TurtleGraphics.Properties.Resources.Turtle;
-                turtleImg = RotateImage(turtleImg, angle);
-                var turtleImgSize = Math.Max(turtleImg.Width, turtleImg.Height);
-                turtleHeadImage.BackgroundImage = turtleImg;
-                turtleHeadImage.Width = turtleImg.Width;
-                turtleHeadImage.Height = turtleImg.Height;
+		#region Private Fields
 
-                var turtleX = 1 + drawControl.ClientSize.Width / 2 + X - turtleHeadImage.Width / 2;
-                var turtleY = 1 + drawControl.ClientSize.Height / 2 - Y - turtleHeadImage.Height / 2;
+		private static float m_Angle;
+		private static int m_Delay;
+		private static Control m_DrawControl;
+		private static Graphics m_DrawGraphics;
+		private static Image m_DrawImage;
+		private static Pen m_DrawPen;
+		private static bool m_PenVisible;
+		private static PictureBox m_TurtleHeadImage;
+		private static float m_X;
+		private static float m_Y;
 
-                turtleHeadImage.Left = (int)Math.Round(turtleX);
-                turtleHeadImage.Top = (int)Math.Round(turtleY);
-            }
-        }
+		#endregion Private Fields
 
-        private static Bitmap RotateImage(Bitmap bmp, float angleDegrees)
-        {
-            Bitmap rotatedImage = new Bitmap(bmp.Width, bmp.Height);
-            using (Graphics g = Graphics.FromImage(rotatedImage))
-            {
-                // Set the rotation point as the center into the matrix
-                g.TranslateTransform(bmp.Width / 2, bmp.Height / 2);
+		#region Private Methods
 
-                // Rotate
-                g.RotateTransform(angleDegrees);
+		private static void DrawControl_ClientSizeChanged(object sender, EventArgs e)
+		{
+			m_DrawControl.Invalidate();
+			DrawTurtle();
+		}
 
-                // Restore the rotation point into the matrix
-                g.TranslateTransform(-bmp.Width / 2, -bmp.Height / 2);
+		private static void DrawControl_Paint(object sender, PaintEventArgs e)
+		{
+			if (m_DrawControl != null)
+			{
+				var top = (m_DrawControl.ClientSize.Width - DRAW_AREA_SIZE) / 2;
+				var left = (m_DrawControl.ClientSize.Height - DRAW_AREA_SIZE) / 2;
+				// TODO: needs a fix -> does not work correctly when drawControl has AutoScroll
+				e.Graphics.DrawImage(m_DrawImage, top, left);
+			}
+		}
 
-                // Draw the image on the new bitmap
-                g.DrawImage(bmp, new Point(0, 0));
-            }
-            bmp.Dispose();
+		private static void DrawTurtle()
+		{
+			if (ShowTurtle)
+			{
+				var turtleImg = Resources.Turtle;
+				turtleImg = RotateImage(turtleImg, m_Angle);
 
-            return rotatedImage;
-        }
+				m_TurtleHeadImage.BackgroundImage = turtleImg;
+				m_TurtleHeadImage.Width = turtleImg.Width;
+				m_TurtleHeadImage.Height = turtleImg.Height;
 
-        private static void PaintAndDelay()
-        {
-            drawControl.Invalidate();
-            if (Delay == 0)
-            {
-                // No delay -> invalidate the control, so it will be repainted later
-            }
-            else
-            {
-                // Immediately paint the control and them delay
-                drawControl.Update();
-                Thread.Sleep(Delay);
-                Application.DoEvents();
-            }
-        }
+				var turtleX = 1 + m_DrawControl.ClientSize.Width / 2 + X - m_TurtleHeadImage.Width / 2;
+				var turtleY = 1 + m_DrawControl.ClientSize.Height / 2 - Y - m_TurtleHeadImage.Height / 2;
 
-        private static void DrawControl_ClientSizeChanged(object sender, EventArgs e)
-        {
-            drawControl.Invalidate();
-            DrawTurtle();
-        }
+				m_TurtleHeadImage.Left = (int)Math.Round(turtleX);
+				m_TurtleHeadImage.Top = (int)Math.Round(turtleY);
+			}
+		}
 
-        private static void DrawControl_Paint(object sender, PaintEventArgs e)
-        {
-            if (drawControl != null)
-            {
-                var top = (drawControl.ClientSize.Width - DrawAreaSize) / 2;
-                var left = (drawControl.ClientSize.Height - DrawAreaSize) / 2;
-                // TODO: needs a fix -> does not work correctly when drawControl has AutoScroll
-                e.Graphics.DrawImage(drawImage, top, left);
-            }
-        }
-    }
+		private static void InitOnDemand()
+		{
+			// Create the drawing surface if it does not already exist
+			if (m_DrawControl == null)
+			{
+				Init();
+			}
+		}
+
+		private static void PaintAndDelay()
+		{
+			m_DrawControl.Invalidate();
+
+			if (Delay == 0)
+			{
+				// No delay -> invalidate the control, so it will be repainted later
+			}
+			else
+			{
+				// Immediately paint the control and them delay
+				m_DrawControl.Update();
+				Thread.Sleep(Delay);
+				Application.DoEvents();
+			}
+		}
+
+		private static Bitmap RotateImage(Bitmap bitmap, float angleDegrees)
+		{
+			Bitmap rotatedImage = new Bitmap(bitmap.Width, bitmap.Height);
+			
+			using (Graphics g = Graphics.FromImage(rotatedImage))
+			{
+				// Set the rotation point as the center into the matrix
+				g.TranslateTransform(bitmap.Width / 2, bitmap.Height / 2);
+
+				// Rotate
+				g.RotateTransform(angleDegrees);
+
+				// Restore the rotation point into the matrix
+				g.TranslateTransform(-bitmap.Width / 2, -bitmap.Height / 2);
+
+				// Draw the image on the new bitmap
+				g.DrawImage(bitmap, new Point(0, 0));
+			}
+			
+			bitmap.Dispose();
+
+			return rotatedImage;
+		}
+
+		private static void SetDoubleBuffered(Control control)
+		{
+			// set instance non-public property with name "DoubleBuffered" to true
+			typeof(Control).InvokeMember("DoubleBuffered",
+				BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+				null, control, new object[] { true });
+		}
+
+		#endregion Private Methods
+
+	}
 }
