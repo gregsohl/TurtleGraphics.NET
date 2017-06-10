@@ -76,5 +76,10 @@ namespace Turtle_Graphics_Example
 				buttonShowHideTurtle.Text = "Hide Turtle";
 			}
 		}
+
+		private void DemoForm_Load(object sender, EventArgs e)
+		{
+			Turtle.Init(panelSurface);
+		}
 	}
 }
