@@ -33,8 +33,12 @@
 			this.buttonReset = new System.Windows.Forms.Button();
 			this.buttonShowHideTurtle = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.statusBar = new System.Windows.Forms.StatusStrip();
 			this.panelSurface = new System.Windows.Forms.Panel();
+			this.Coordinates = new System.Windows.Forms.ToolStripStatusLabel();
+			this.Angle = new System.Windows.Forms.ToolStripStatusLabel();
 			this.panel1.SuspendLayout();
+			this.statusBar.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// buttonDraw
@@ -89,14 +93,37 @@
 			this.panel1.Size = new System.Drawing.Size(101, 720);
 			this.panel1.TabIndex = 4;
 			// 
+			// statusBar
+			// 
+			this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Coordinates,
+            this.Angle});
+			this.statusBar.Location = new System.Drawing.Point(101, 698);
+			this.statusBar.Name = "statusBar";
+			this.statusBar.Size = new System.Drawing.Size(912, 22);
+			this.statusBar.TabIndex = 6;
+			this.statusBar.Text = "statusStrip1";
+			// 
 			// panelSurface
 			// 
 			this.panelSurface.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.panelSurface.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.panelSurface.Location = new System.Drawing.Point(101, 0);
 			this.panelSurface.Name = "panelSurface";
-			this.panelSurface.Size = new System.Drawing.Size(912, 720);
-			this.panelSurface.TabIndex = 5;
+			this.panelSurface.Size = new System.Drawing.Size(912, 698);
+			this.panelSurface.TabIndex = 7;
+			// 
+			// Coordinates
+			// 
+			this.Coordinates.Name = "Coordinates";
+			this.Coordinates.Size = new System.Drawing.Size(109, 17);
+			this.Coordinates.Text = "toolStripStatusLabel1";
+			// 
+			// Angle
+			// 
+			this.Angle.Name = "Angle";
+			this.Angle.Size = new System.Drawing.Size(109, 17);
+			this.Angle.Text = "toolStripStatusLabel2";
 			// 
 			// DemoForm
 			// 
@@ -104,12 +131,16 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1013, 720);
 			this.Controls.Add(this.panelSurface);
+			this.Controls.Add(this.statusBar);
 			this.Controls.Add(this.panel1);
 			this.Name = "DemoForm";
 			this.Text = "Nakov.TurtleGraphics - Demo";
 			this.Load += new System.EventHandler(this.DemoForm_Load);
 			this.panel1.ResumeLayout(false);
+			this.statusBar.ResumeLayout(false);
+			this.statusBar.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -120,6 +151,9 @@
 		private System.Windows.Forms.Button buttonReset;
 		private System.Windows.Forms.Button buttonShowHideTurtle;
 		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.StatusStrip statusBar;
+		private System.Windows.Forms.ToolStripStatusLabel Coordinates;
+		private System.Windows.Forms.ToolStripStatusLabel Angle;
 		private System.Windows.Forms.Panel panelSurface;
 	}
 }
